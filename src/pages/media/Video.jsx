@@ -20,12 +20,18 @@ function Video() {
       try {
         const params = new URLSearchParams({ page: currentPage, limit: itemsPerPage });
         const res  = await fetch(`/api/galeri-video?${params}`);
-        if (!res.ok) throw new Error('Gagal mengambil data galeri video');
         const json = await res.json();
-        setVideoItems(json.data);
-        setTotalPages(json.pagination.totalPages);
+        
+        if (!res.ok) {
+          const errMsg = json.error || `Error: ${res.status}`;
+          throw new Error(errMsg);
+        }
+        
+        setVideoItems(json.data || []);
+        setTotalPages(json.pagination?.totalPages || 1);
       } catch (err) {
-        setError(err.message);
+        console.error('Video API Error:', err);
+        setError(err.message || 'Gagal mengambil data galeri video');
       } finally {
         setLoading(false);
       }

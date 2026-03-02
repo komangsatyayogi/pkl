@@ -20,12 +20,18 @@ function Foto() {
       try {
         const params = new URLSearchParams({ page: currentPage, limit: itemsPerPage });
         const res  = await fetch(`/api/galeri-foto?${params}`);
-        if (!res.ok) throw new Error('Gagal mengambil data galeri foto');
         const json = await res.json();
-        setGalleryItems(json.data);
-        setTotalPages(json.pagination.totalPages);
+        
+        if (!res.ok) {
+          const errMsg = json.error || `Error: ${res.status}`;
+          throw new Error(errMsg);
+        }
+        
+        setGalleryItems(json.data || []);
+        setTotalPages(json.pagination?.totalPages || 1);
       } catch (err) {
-        setError(err.message);
+        console.error('Foto API Error:', err);
+        setError(err.message || 'Gagal mengambil data galeri foto');
       } finally {
         setLoading(false);
       }

@@ -13,4 +13,8 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    // Vercel akan otomatis handle /api routes dari folder 'api/'
+    // Tidak perlu proxy di production
+  }
 })

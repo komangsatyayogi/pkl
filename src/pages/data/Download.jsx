@@ -31,13 +31,19 @@ function Download() {
           search: searchTerm,
         });
         const res  = await fetch(`/api/download?${params}`);
-        if (!res.ok) throw new Error('Gagal mengambil data download');
         const json = await res.json();
-        setDownloadData(json.data);
-        setTotalPages(json.pagination.totalPages);
+        
+        if (!res.ok) {
+          const errMsg = json.error || `Error: ${res.status}`;
+          throw new Error(errMsg);
+        }
+        
+        setDownloadData(json.data || []);
+        setTotalPages(json.pagination?.totalPages || 1);
         if (json.categories) setCategories(json.categories);
       } catch (err) {
-        setError(err.message);
+        console.error('Download API Error:', err);
+        setError(err.message || 'Gagal mengambil data download');
       } finally {
         setLoading(false);
       }
