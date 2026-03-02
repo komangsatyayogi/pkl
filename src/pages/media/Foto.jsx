@@ -1,131 +1,40 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Breadcrumb from "../../components/Breadcrumb";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Foto() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Data foto-foto dari gallery
-  const galleryItems = [
-    {
-      id: 1,
-      title: "APN 2023",
-      date: "01 Juli 2024 15:07:41 WIB",
-      author: "administrator2",
-      views: "160 view",
-      image: "/placeholder-image.jpg",
-      description: "Kegiatan Asesmen Pangan Nasional (APN) tahun 2023 yang dilaksanakan di berbagai daerah."
-    },
-    {
-      id: 2,
-      title: "Launching LDPM Prov. Sumbar dan KRPL Kab. Agam 2015",
-      date: "16 September 2016 00:00:00 WIB",
-      author: "Administrator",
-      views: "1195 view",
-      image: "/placeholder-image.jpg",
-      description: "Peluncuran program Lahan Diversifikasi Pangan Masyarakat (LDPM) dan Kawasan Rumah Pangan Lestari (KRPL)."
-    },
-    {
-      id: 3,
-      title: "APN 2024",
-      date: "17 Desember 2024 09:08:14 WIB",
-      author: "administrator2",
-      views: "56 view",
-      image: "/placeholder-image.jpg",
-      description: "Asesmen Pangan Nasional tahun 2024 dengan fokus evaluasi ketahanan pangan daerah."
-    },
-    {
-      id: 4,
-      title: "Penilaian Apresiasi P-KRPL Pada KWT Kab/Kota",
-      date: "05 Desember 2024 09:56:03 WIB",
-      author: "administrator2",
-      views: "72 view",
-      image: "/placeholder-image.jpg",
-      description: "Kegiatan penilaian apresiasi Program Kawasan Rumah Pangan Lestari pada Kelompok Wanita Tani."
-    },
-    {
-      id: 5,
-      title: "Festival Pangan Nusantara tahun 2024 dan BAPANAS Awards 2023",
-      date: "30 Juli 2024 10:56:36 WIB",
-      author: "administrator2",
-      views: "160 view",
-      image: "/placeholder-image.jpg",
-      description: "Festival Pangan Nusantara dan pemberian penghargaan BAPANAS Awards untuk pencapaian terbaik."
-    },
-    {
-      id: 6,
-      title: "Sosialisasi Gerakan Konsumsi Pangan B2SA",
-      date: "15 Juni 2024 14:30:25 WIB",
-      author: "administrator2",
-      views: "89 view",
-      image: "/placeholder-image.jpg",
-      description: "Kegiatan sosialisasi Gerakan Konsumsi Pangan Beragam, Bergizi, Seimbang, dan Aman (B2SA)."
-    },
-    {
-      id: 7,
-      title: "Workshop Keamanan Pangan",
-      date: "10 Mei 2024 08:00:00 WIB",
-      author: "administrator1",
-      views: "145 view",
-      image: "/placeholder-image.jpg",
-      description: "Workshop peningkatan pemahaman tentang keamanan pangan untuk pelaku usaha mikro dan kecil."
-    },
-    {
-      id: 8,
-      title: "Monitoring Harga Pangan Pokok",
-      date: "25 April 2024 16:15:30 WIB",
-      author: "administrator2",
-      views: "78 view",
-      image: "/placeholder-image.jpg",
-      description: "Kegiatan monitoring harga pangan pokok di berbagai pasar tradisional di Sumatera Barat."
-    },
-    {
-      id: 9,
-      title: "Pelatihan Diversifikasi Pangan Lokal",
-      date: "18 Maret 2024 09:45:12 WIB",
-      author: "administrator1",
-      views: "234 view",
-      image: "/placeholder-image.jpg",
-      description: "Pelatihan pengolahan dan diversifikasi pangan lokal untuk meningkatkan nilai tambah produk."
-    },
-    {
-      id: 10,
-      title: "Rapat Koordinasi Ketahanan Pangan",
-      date: "05 Februari 2024 13:20:45 WIB",
-      author: "administrator2",
-      views: "167 view",
-      image: "/placeholder-image.jpg",
-      description: "Rapat koordinasi lintas sektor untuk memperkuat sistem ketahanan pangan daerah."
-    },
-    {
-      id: 11,
-      title: "Pameran Produk Pangan Unggulan",
-      date: "22 Januari 2024 11:00:00 WIB",
-      author: "administrator1",
-      views: "298 view",
-      image: "/placeholder-image.jpg",
-      description: "Pameran produk pangan unggulan daerah dalam rangka promosi produk lokal Sumatera Barat."
-    },
-    {
-      id: 12,
-      title: "Evaluasi Program Gizi Masyarakat",
-      date: "15 Desember 2023 14:30:15 WIB",
-      author: "administrator2",
-      views: "124 view",
-      image: "/placeholder-image.jpg",
-      description: "Evaluasi tahunan program peningkatan status gizi masyarakat di wilayah Sumatera Barat."
-    }
-  ];
+  // State dari API
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [totalPages, setTotalPages]     = useState(1);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
 
-  // Hitung total halaman
-  const totalPages = Math.ceil(galleryItems.length / itemsPerPage);
-  
-  // Ambil data untuk halaman saat ini
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = galleryItems.slice(indexOfFirstItem, indexOfLastItem);
+  useEffect(() => {
+    const fetchFoto = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ page: currentPage, limit: itemsPerPage });
+        const res  = await fetch(`/api/galeri-foto?${params}`);
+        if (!res.ok) throw new Error('Gagal mengambil data galeri foto');
+        const json = await res.json();
+        setGalleryItems(json.data);
+        setTotalPages(json.pagination.totalPages);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFoto();
+  }, [currentPage]);
+
+  // Ambil data untuk halaman saat ini (sudah dipaginasi dari API)
+  const currentItems = galleryItems;
 
   // Fungsi untuk mengubah halaman
   const paginate = (pageNumber) => {
@@ -161,7 +70,32 @@ function Foto() {
             Dokumentasi kegiatan dan program-program Dinas Pangan Provinsi Sumatera Barat dalam mendukung ketahanan pangan daerah.
           </p>
         </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
+                <div className="h-48 bg-gray-200" />
+                <div className="p-6 space-y-3">
+                  <div className="h-5 bg-gray-200 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 rounded w-full" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <p className="text-red-600 font-medium">⚠️ {error}</p>
+            <p className="text-red-500 text-sm mt-1">Pastikan server API sudah berjalan di port 3000</p>
+          </div>
+        )}
+
         {/* Gallery Grid */}
+        {!loading && !error && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentItems.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -202,54 +136,71 @@ function Foto() {
             </div>
           ))}
         </div>
+        )}
+
         {/* Pagination */}
+        {!loading && !error && totalPages > 1 && (
         <div className="flex justify-center mt-12">
-          <nav className="flex items-center space-x-2">
+          <nav className="flex items-center space-x-1">
             <button 
               onClick={prevPage}
               disabled={currentPage === 1}
               className={`px-3 py-2 ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 cursor-pointer'}`}
+              title="Halaman sebelumnya"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
-            </button>            
-            {/* Render nomor halaman */}
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => paginate(index + 1)}
-                className={`px-4 py-2 rounded-full font-medium ${
-                  currentPage === index + 1
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}          
-            <button 
-              onClick={nextPage}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-2 font-medium ${
-                currentPage === totalPages 
-                  ? 'text-gray-300 cursor-not-allowed' 
-                  : 'text-blue-600 hover:text-blue-800 cursor-pointer'
-              }`}
-            >
-              Next
-            </button>            
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, index) => {
+              const pageNumber = index + 1;
+              const isCurrentPage = pageNumber === currentPage;
+              
+              const showPage = 
+                pageNumber === 1 ||
+                pageNumber === totalPages ||
+                (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2);
+              
+              if (!showPage) {
+                if (pageNumber === currentPage - 3 || pageNumber === currentPage + 3) {
+                  return (
+                    <span key={pageNumber} className="px-2 py-2 text-gray-500">
+                      …
+                    </span>
+                  );
+                }
+                return null;
+              }
+
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() => paginate(pageNumber)}
+                  className={`px-3 py-2 rounded font-medium ${
+                    isCurrentPage
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+            
             <button 
               onClick={nextPage}
               disabled={currentPage === totalPages}
               className={`px-3 py-2 ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 cursor-pointer'}`}
+              title="Halaman berikutnya"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </nav>
-        </div>       
+        </div>
+        )}
       </div>      
       <Footer />
     </div>

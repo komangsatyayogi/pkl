@@ -150,7 +150,7 @@ function Footer() {
         {/* Copyright */}
         <div className="border-t border-gray-600 mt-12 pt-6">                   
           <p className="text-sm text-center">
-            &copy; 2025 <span className="text-white">Dinas Pangan Provinsi Sumatera Barat.</span> All Rights Reserved.
+            &copy; {new Date().getFullYear()} <span className="text-white">Dinas Pangan Provinsi Sumatera Barat.</span> All Rights Reserved.
           </p>       
         </div>
       </div>

@@ -1,103 +1,40 @@
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import Breadcrumb from "../../components/Breadcrumb";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Video() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Data video-video dari website
-  const videoItems = [
-    {
-      id: 1,
-      title: "Hari Pangan Sedunia Ke-44",
-      date: "14 Oct 2024 14:10:42",
-      author: "Administrator",
-      views: "892 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Peringatan Hari Pangan Sedunia ke-44 di Sumatera Barat dengan tema 'Makanan Untuk Semua'."
-    },
-    {
-      id: 2,
-      title: "Inovasi Toko Tani Indonesia Center (TTIC) Sumbar",
-      date: "09 May 2020 09:05:10",
-      author: "Administrator",
-      views: "1,245 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Program inovasi Toko Tani Indonesia Center di Sumatera Barat untuk mendukung petani lokal."
-    },
-    {
-      id: 3,
-      title: "Workshop Keamanan Pangan 2024",
-      date: "15 Aug 2024 10:30:15",
-      author: "Administrator",
-      views: "567 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Workshop peningkatan pemahaman keamanan pangan untuk pelaku usaha di Sumatera Barat."
-    },
-    {
-      id: 4,
-      title: "Festival Pangan Nusantara 2024",
-      date: "22 Jul 2024 13:45:30",
-      author: "Administrator",
-      views: "1,034 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Festival Pangan Nusantara dan BAPANAS Awards 2024 di Sumatera Barat."
-    },
-    {
-      id: 5,
-      title: "Sosialisasi Program B2SA",
-      date: "10 Jun 2024 08:20:45",
-      author: "Administrator",
-      views: "789 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Sosialisasi Program Beragam, Bergizi, Seimbang, dan Aman (B2SA) kepada masyarakat."
-    },
-    {
-      id: 6,
-      title: "Monitoring Ketahanan Pangan Daerah",
-      date: "28 Apr 2024 14:15:20",
-      author: "Administrator",
-      views: "623 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Kegiatan monitoring dan evaluasi ketahanan pangan di berbagai daerah Sumatera Barat."
-    },
-    {
-      id: 7,
-      title: "Pelatihan Diversifikasi Pangan",
-      date: "18 Mar 2024 11:00:00",
-      author: "Administrator",
-      views: "445 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Pelatihan diversifikasi pangan lokal untuk meningkatkan nilai tambah produk petani."
-    },
-    {
-      id: 8,
-      title: "Launching KRPL 2024",
-      date: "05 Feb 2024 09:30:15",
-      author: "Administrator",
-      views: "856 view",
-      thumbnail: "/placeholder-video.jpg",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-      description: "Peluncuran program Kawasan Rumah Pangan Lestari (KRPL) tahun 2024."
-    }
-  ];
+  // State dari API
+  const [videoItems, setVideoItems] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
 
-  // Hitung total halaman
-  const totalPages = Math.ceil(videoItems.length / itemsPerPage);
-  
-  // Ambil data untuk halaman saat ini
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = videoItems.slice(indexOfFirstItem, indexOfLastItem);
+  useEffect(() => {
+    const fetchVideo = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ page: currentPage, limit: itemsPerPage });
+        const res  = await fetch(`/api/galeri-video?${params}`);
+        if (!res.ok) throw new Error('Gagal mengambil data galeri video');
+        const json = await res.json();
+        setVideoItems(json.data);
+        setTotalPages(json.pagination.totalPages);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVideo();
+  }, [currentPage]);
+
+  // Data untuk halaman saat ini sudah dipaginasi dari API
+  const currentItems = videoItems;
 
   // Fungsi untuk mengubah halaman
   const paginate = (pageNumber) => {
@@ -134,7 +71,32 @@ function Video() {
           </p>
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-lg overflow-hidden animate-pulse">
+                <div className="h-48 bg-gray-200" />
+                <div className="p-6 space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-1/4" />
+                  <div className="h-5 bg-gray-200 rounded w-full" />
+                  <div className="h-4 bg-gray-200 rounded w-5/6" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <p className="text-red-600 font-medium">⚠️ {error}</p>
+            <p className="text-red-500 text-sm mt-1">Pastikan server API sudah berjalan di port 3000</p>
+          </div>
+        )}
+
         {/* Video Grid */}
+        {!loading && !error && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentItems.map((item) => (
             <div key={item.id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -174,58 +136,71 @@ function Video() {
             </div>
           ))}
         </div>
+        )}
 
         {/* Pagination */}
+        {!loading && !error && totalPages > 1 && (
         <div className="flex justify-center mt-12">
-          <nav className="flex items-center space-x-2">
+          <nav className="flex items-center space-x-1">
             <button 
               onClick={prevPage}
               disabled={currentPage === 1}
               className={`px-3 py-2 ${currentPage === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 cursor-pointer'}`}
+              title="Halaman sebelumnya"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
-            {/* Render nomor halaman */}
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => paginate(index + 1)}
-                className={`px-4 py-2 rounded-full font-medium ${
-                  currentPage === index + 1
-                    ? 'bg-red-600 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
-            
-            <button 
-              onClick={nextPage}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-2 font-medium ${
-                currentPage === totalPages 
-                  ? 'text-gray-300 cursor-not-allowed' 
-                  : 'text-red-600 hover:text-red-800 cursor-pointer'
-              }`}
-            >
-              Next
-            </button>
+            {Array.from({ length: totalPages }, (_, index) => {
+              const pageNumber = index + 1;
+              const isCurrentPage = pageNumber === currentPage;
+              
+              const showPage = 
+                pageNumber === 1 ||
+                pageNumber === totalPages ||
+                (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2);
+              
+              if (!showPage) {
+                if (pageNumber === currentPage - 3 || pageNumber === currentPage + 3) {
+                  return (
+                    <span key={pageNumber} className="px-2 py-2 text-gray-500">
+                      …
+                    </span>
+                  );
+                }
+                return null;
+              }
+
+              return (
+                <button
+                  key={pageNumber}
+                  onClick={() => paginate(pageNumber)}
+                  className={`px-3 py-2 rounded font-medium ${
+                    isCurrentPage
+                      ? 'bg-red-600 text-white'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
             
             <button 
               onClick={nextPage}
               disabled={currentPage === totalPages}
               className={`px-3 py-2 ${currentPage === totalPages ? 'text-gray-300 cursor-not-allowed' : 'text-gray-500 hover:text-gray-700 cursor-pointer'}`}
+              title="Halaman berikutnya"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </nav>
-        </div>      
+        </div>
+        )}
       </div>    
       <Footer />
     </div>

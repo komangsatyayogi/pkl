@@ -10,6 +10,8 @@ function SearchBox({ placeholder = "Pencarian Data", className = "", compact = f
     if (searchQuery.trim()) {
       // Navigate to search page with query parameter
       navigate(`/data/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      alert("Kolom tidak boleh kosong"); // Warning message for empty input
     }
   };
 
@@ -39,6 +41,7 @@ function SearchBox({ placeholder = "Pencarian Data", className = "", compact = f
         onChange={(e) => setSearchQuery(e.target.value)}
         onKeyPress={handleKeyPress}
         placeholder={placeholder}
+        maxLength={100}
         className={`bg-white text-gray-800 placeholder-gray-500 rounded-l focus:outline-none focus:ring-2 focus:ring-green-500 ${sizeClasses[size]} ${widthClasses[size]}`}
       />
       <button 

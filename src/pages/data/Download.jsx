@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { useToast } from '../../components/ToastProvider';
@@ -7,122 +7,50 @@ import Breadcrumb from '../../components/Breadcrumb';
 function Download() {
   const { addToast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm]             = useState('');
+  const [currentPage, setCurrentPage]           = useState(1);
   const itemsPerPage = 5;
 
-  // Data download dummy
-  const downloadData = [
-    {
-      id: 1,
-      title: "Laporan Ketahanan Pangan Sumbar 2023",
-      description: "Laporan komprehensif mengenai kondisi ketahanan pangan di Provinsi Sumatera Barat tahun 2023",
-      fileType: "PDF",
-      fileSize: "2.5 MB",
-      uploadDate: "2024-01-15",
-      category: "Laporan",
-      downloadCount: 145,
-      fileName: "laporan-ketahanan-pangan-2023.pdf"
-    },
-    {
-      id: 2,
-      title: "Panduan Teknis KRPL (Kawasan Rumah Pangan Lestari)",
-      description: "Panduan lengkap implementasi program Kawasan Rumah Pangan Lestari untuk kelompok tani",
-      fileType: "PDF",
-      fileSize: "1.8 MB",
-      uploadDate: "2024-01-12",
-      category: "Panduan",
-      downloadCount: 89,
-      fileName: "panduan-krpl-2024.pdf"
-    },
-    {
-      id: 3,
-      title: "Data Produksi Padi Sumbar 2023",
-      description: "Data statistik produksi padi di seluruh kabupaten/kota Sumatera Barat tahun 2023",
-      fileType: "XLSX",
-      fileSize: "850 KB",
-      uploadDate: "2024-01-10",
-      category: "Data",
-      downloadCount: 203,
-      fileName: "data-produksi-padi-2023.xlsx"
-    },
-    {
-      id: 4,
-      title: "Formulir Permohonan Bantuan Benih",
-      description: "Formulir resmi untuk pengajuan bantuan benih kepada kelompok tani",
-      fileType: "DOCX",
-      fileSize: "156 KB",
-      uploadDate: "2024-01-08",
-      category: "Formulir",
-      downloadCount: 67,
-      fileName: "formulir-bantuan-benih.docx"
-    },
-    {
-      id: 5,
-      title: "Peraturan Daerah No. 8 Tahun 2023",
-      description: "Peraturan Daerah tentang Penyelenggaraan Ketahanan Pangan di Provinsi Sumatera Barat",
-      fileType: "PDF",
-      fileSize: "3.2 MB",
-      uploadDate: "2024-01-05",
-      category: "Peraturan",
-      downloadCount: 124,
-      fileName: "perda-no8-2023.pdf"
-    },
-    {
-      id: 6,
-      title: "Daftar Harga Pangan Harian",
-      description: "Update harga komoditas pangan di pasar tradisional Sumatera Barat",
-      fileType: "XLSX",
-      fileSize: "245 KB",
-      uploadDate: "2024-01-03",
-      category: "Data",
-      downloadCount: 312,
-      fileName: "harga-pangan-harian.xlsx"
-    },
-    {
-      id: 7,
-      title: "Standar Operasional Prosedur (SOP) Distribusi Pangan",
-      description: "SOP lengkap untuk proses distribusi bantuan pangan kepada masyarakat",
-      fileType: "PDF",
-      fileSize: "1.2 MB",
-      uploadDate: "2023-12-28",
-      category: "SOP",
-      downloadCount: 78,
-      fileName: "sop-distribusi-pangan.pdf"
-    },
-    {
-      id: 8,
-      title: "Proposal Program Lumbung Pangan Desa",
-      description: "Template proposal untuk pengembangan lumbung pangan di tingkat desa",
-      fileType: "DOCX",
-      fileSize: "890 KB",
-      uploadDate: "2023-12-25",
-      category: "Template",
-      downloadCount: 156,
-      fileName: "proposal-lumbung-pangan.docx"
-    }
-  ];
+  // State dari API
+  const [downloadData, setDownloadData] = useState([]);
+  const [categories, setCategories]     = useState(['all']);
+  const [totalPages, setTotalPages]     = useState(1);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
 
-  const categories = ['all', 'Laporan', 'Panduan', 'Data', 'Formulir', 'Peraturan', 'SOP', 'Template'];
+  // Fetch data dari API setiap kali filter berubah
+  useEffect(() => {
+    const fetchDownload = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit: itemsPerPage,
+          category: selectedCategory,
+          search: searchTerm,
+        });
+        const res  = await fetch(`/api/download?${params}`);
+        if (!res.ok) throw new Error('Gagal mengambil data download');
+        const json = await res.json();
+        setDownloadData(json.data);
+        setTotalPages(json.pagination.totalPages);
+        if (json.categories) setCategories(json.categories);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDownload();
+  }, [currentPage, selectedCategory, searchTerm]);
 
-  // Filter berdasarkan kategori dan pencarian
-  const filteredDownloads = downloadData.filter(item => {
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredDownloads.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedDownloads = filteredDownloads.slice(startIndex, endIndex);
-
-  // Reset to first page when filters change
-  React.useEffect(() => {
+  // Reset page ke 1 saat filter berubah
+  useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategory, searchTerm]);
+
+  const paginatedDownloads = downloadData;
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -216,7 +144,35 @@ function Download() {
             </div>
             {/* Main Content */}
             <div className="lg:w-3/4">
+
+              {/* Loading State */}
+              {loading && (
+                <div className="space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-lg shadow-sm p-6 animate-pulse">
+                      <div className="flex gap-4">
+                        <div className="w-12 h-12 bg-gray-200 rounded" />
+                        <div className="flex-1 space-y-3">
+                          <div className="h-5 bg-gray-200 rounded w-3/4" />
+                          <div className="h-4 bg-gray-200 rounded w-full" />
+                          <div className="h-4 bg-gray-200 rounded w-1/2" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Error State */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                  <p className="text-red-600 font-medium">⚠️ {error}</p>
+                  <p className="text-red-500 text-sm mt-1">Pastikan server API sudah berjalan di port 3000</p>
+                </div>
+              )}
+
               {/* File List */}
+              {!loading && !error && (
               <div className="space-y-4">
                 {paginatedDownloads.map((file) => (
                   <div key={file.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
@@ -269,10 +225,11 @@ function Download() {
                   </div>
                 ))}
               </div>
+              )} 
 
               {/* Pagination */}
-              {filteredDownloads.length > 0 && totalPages > 1 && (
-                <div className="flex justify-center items-center mt-8 space-x-2">
+              {!loading && !error && downloadData.length > 0 && totalPages > 1 && (
+                <div className="flex justify-center items-center mt-8 space-x-1">
                   {/* Previous Button */}
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -293,18 +250,16 @@ function Download() {
                     const pageNumber = index + 1;
                     const isCurrentPage = pageNumber === currentPage;
                     
-                    // Show first page, last page, current page, and pages around current page
                     const showPage = 
                       pageNumber === 1 ||
                       pageNumber === totalPages ||
-                      (pageNumber >= currentPage - 1 && pageNumber <= currentPage + 1);
+                      (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2);
                     
                     if (!showPage) {
-                      // Show ellipsis for gaps
-                      if (pageNumber === currentPage - 2 || pageNumber === currentPage + 2) {
+                      if (pageNumber === currentPage - 3 || pageNumber === currentPage + 3) {
                         return (
                           <span key={pageNumber} className="px-2 py-2 text-gray-500">
-                            ...
+                            …
                           </span>
                         );
                       }
@@ -344,7 +299,7 @@ function Download() {
               )}
              
               {/* No Results */}
-              {filteredDownloads.length === 0 && (
+              {!loading && !error && paginatedDownloads.length === 0 && (
                 <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                   <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />

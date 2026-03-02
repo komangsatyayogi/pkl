@@ -8,102 +8,42 @@ function Berita() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const itemsPerPage = 6;
 
-  // Data berita dummy
-  const beritaData = [
-    {
-      id: 1,
-      title: "Dinas Pangan Sumbar Gelar Sosialisasi Program Ketahanan Pangan 2024",
-      excerpt: "Dalam upaya meningkatkan ketahanan pangan di Sumatera Barat, Dinas Pangan menggelar sosialisasi program unggulan...",
-      image: "/pimpinan.webp",
-      date: "2024-01-15",
-      category: "Program",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 2,
-      title: "Monitoring Stok Beras di Gudang Bulog Sumbar",
-      excerpt: "Tim Dinas Pangan melakukan monitoring rutin terhadap stok beras di berbagai gudang Bulog untuk memastikan...",
-      image: "/pimpinan.webp",
-      date: "2024-01-12",
-      category: "Kegiatan",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 3,
-      title: "Petani Sumbar Raih Penghargaan Nasional Produktivitas Padi",
-      excerpt: "Kelompok tani dari Kabupaten Tanah Datar berhasil meraih penghargaan tingkat nasional atas prestasi...",
-      image: "/pimpinan.webp",
-      date: "2024-01-10",
-      category: "Prestasi",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 4,
-      title: "Workshop Diversifikasi Pangan Lokal di Padang",
-      excerpt: "Dinas Pangan menyelenggarakan workshop diversifikasi pangan lokal yang dihadiri puluhan pelaku usaha...",
-      image: "/pimpinan.webp",
-      date: "2024-01-08",
-      category: "Workshop",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 5,
-      title: "Penyaluran Bantuan Benih Padi Unggul kepada Petani",
-      excerpt: "Sebanyak 1000 kg benih padi unggul disalurkan kepada petani di 5 kabupaten/kota di Sumatera Barat...",
-      image: "/pimpinan.webp",
-      date: "2024-01-05",
-      category: "Program",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 6,
-      title: "Rapat Koordinasi Stabilisasi Harga Pangan",
-      excerpt: "Dinas Pangan menggelar rapat koordinasi dengan berbagai stakeholder untuk menjaga stabilitas harga pangan...",
-      image: "/pimpinan.webp",
-      date: "2024-01-03",
-      category: "Kegiatan",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 7,
-      title: "Inovasi Teknologi Penyimpanan Pangan di Era Digital",
-      excerpt: "Penerapan teknologi modern dalam penyimpanan pangan menjadi kunci dalam menjaga kualitas dan mengurangi...",
-      image: "/pimpinan.webp",
-      date: "2023-12-28",
-      category: "Inovasi",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 8,
-      title: "Pelatihan KRPL untuk Kelompok Wanita Tani",
-      excerpt: "Program Kawasan Rumah Pangan Lestari (KRPL) terus dikembangkan melalui pelatihan intensif kepada...",
-      image: "/pimpinan.webp",
-      date: "2023-12-25",
-      category: "Pelatihan",
-      author: "Admin Dinas Pangan"
-    },
-    {
-      id: 9,
-      title: "Evaluasi Program Lumbung Pangan Desa",
-      excerpt: "Evaluasi menyeluruh terhadap program lumbung pangan desa menunjukkan peningkatan signifikan dalam...",
-      image: "/pimpinan.webp",
-      date: "2023-12-22",
-      category: "Evaluasi",
-      author: "Admin Dinas Pangan"
-    }
-  ];
+  // State dari API
+  const [beritaData, setBeritaData]   = useState([]);
+  const [categories, setCategories]   = useState(['all']);
+  const [totalPages, setTotalPages]   = useState(1);
+  const [totalCount, setTotalCount]   = useState(0);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState(null);
 
-  const categories = ['all', 'Program', 'Kegiatan', 'Prestasi', 'Workshop', 'Inovasi', 'Pelatihan', 'Evaluasi'];
+  // Fetch data dari API setiap kali page / kategori berubah
+  useEffect(() => {
+    const fetchBerita = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({
+          page: currentPage,
+          limit: itemsPerPage,
+          category: selectedCategory,
+        });
+        const res  = await fetch(`/api/berita?${params}`);
+        if (!res.ok) throw new Error('Gagal mengambil data berita');
+        const json = await res.json();
+        setBeritaData(json.data);
+        setTotalPages(json.pagination.totalPages);
+        setTotalCount(json.pagination.total);
+        if (json.categories) setCategories(json.categories);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBerita();
+  }, [currentPage, selectedCategory]);
 
-  // Filter berita berdasarkan kategori
-  const filteredBerita = selectedCategory === 'all' 
-    ? beritaData 
-    : beritaData.filter(berita => berita.category === selectedCategory);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredBerita.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentBerita = filteredBerita.slice(startIndex, startIndex + itemsPerPage);
+  const currentBerita = beritaData;
 
   const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -153,7 +93,7 @@ function Berita() {
                 <div className="space-y-3 text-sm">
                   <div>
                     <div className="font-medium">Total Berita:</div>
-                    <div>{beritaData.length} artikel</div>
+                    <div>{totalCount} artikel</div>
                   </div>
                   <div>
                     <div className="font-medium">Terakhir Update:</div>
@@ -165,9 +105,34 @@ function Berita() {
 
             {/* Main Content */}
             <div className="lg:w-3/4">
+              {/* Loading State */}
+              {loading && (
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
+                      <div className="w-full h-48 bg-gray-200" />
+                      <div className="p-6 space-y-3">
+                        <div className="h-4 bg-gray-200 rounded w-1/3" />
+                        <div className="h-5 bg-gray-200 rounded w-full" />
+                        <div className="h-4 bg-gray-200 rounded w-5/6" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Error State */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-8 text-center">
+                  <p className="text-red-600 font-medium">⚠️ {error}</p>
+                  <p className="text-red-500 text-sm mt-1">Pastikan server API sudah berjalan di port 3000</p>
+                </div>
+              )}
+
               {/* Berita Grid */}
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                {currentBerita.map((berita) => (
+              {!loading && !error && (
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                  {currentBerita.map((berita) => (
                   <div key={berita.id} className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                     <img 
                       src={berita.image} 
@@ -195,12 +160,13 @@ function Berita() {
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center space-x-2 bg-white p-4 rounded-lg shadow-sm">
+              {!loading && !error && totalPages > 1 && (
+                <div className="flex justify-center items-center space-x-1 bg-white p-4 rounded-lg shadow-sm">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
@@ -209,19 +175,40 @@ function Berita() {
                     ←
                   </button>
                   
-                  {[...Array(totalPages)].map((_, index) => (
-                    <button
-                      key={index + 1}
-                      onClick={() => setCurrentPage(index + 1)}
-                      className={`px-3 py-1 rounded-md transition-colors ${
-                        currentPage === index + 1
-                          ? 'bg-[#0C3823] text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      {index + 1}
-                    </button>
-                  ))}
+                  {Array.from({ length: totalPages }, (_, index) => {
+                    const pageNumber = index + 1;
+                    const isCurrentPage = pageNumber === currentPage;
+                    
+                    const showPage = 
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2);
+                    
+                    if (!showPage) {
+                      if (pageNumber === currentPage - 3 || pageNumber === currentPage + 3) {
+                        return (
+                          <span key={pageNumber} className="px-2 py-1 text-gray-500">
+                            …
+                          </span>
+                        );
+                      }
+                      return null;
+                    }
+
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`px-3 py-1 rounded-md transition-colors ${
+                          isCurrentPage
+                            ? 'bg-[#0C3823] text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                        }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
                   
                   <button
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}

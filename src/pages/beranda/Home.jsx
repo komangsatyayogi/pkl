@@ -12,13 +12,13 @@ function Home() {
     {
       id: 1,
   image: "/slide1.png", 
-  title: ".",
+  title: "",
   // description: "Program inovatif untuk meningkatkan ketersediaan, distribusi, dan kualitas pangan"
     },
     {
       id: 2,
   image: "/slide2.png",
-  title: ".",
+  title: "",
   // description: "Mewujudkan ketahanan pangan yang berkelanjutan, aman, dan bergizi untuk masyarakat"
     },    
   ];
