@@ -90,7 +90,7 @@ function Foto() {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
             <p className="text-red-600 font-medium">⚠️ {error}</p>
-            <p className="text-red-500 text-sm mt-1">Pastikan server API sudah berjalan di port 3000</p>
+            <p className="text-red-500 text-sm mt-1">Pastikan server API sudah berjalan di port 5000</p>
           </div>
         )}
 
