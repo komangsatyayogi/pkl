@@ -1,4 +1,4 @@
-import { connectDB } from '../server/db.js';
+import { connectDB } from './db.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Credentials', 'true');
