@@ -1,12 +1,14 @@
-const { MongoClient } = require('mongodb');
-require('dotenv').config();
+import { MongoClient } from 'mongodb';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const DB_NAME     = process.env.DB_NAME     || 'dinas_pangan_sumbar';
 
 let db = null;
 
-async function connectDB() {
+export async function connectDB() {
   if (db) return db;
   const client = new MongoClient(MONGODB_URI);
   await client.connect();
@@ -15,4 +17,4 @@ async function connectDB() {
   return db;
 }
 
-module.exports = { connectDB };
+export { connectDB };
