@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Vercel-Admin-atlas-canary-lever:pOwhO4XNoYHG8no5@atlas-canary-lever.myi3mkf.mongodb.net/?retryWrites=true&w=majority';
 const DB_NAME     = process.env.DB_NAME     || 'dinas_pangan_sumbar';
 
 let db = null;
