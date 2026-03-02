@@ -10,7 +10,7 @@
     }
   },
   "env": {
-    "MONGODB_URI": "@MONGODB_URI",
-    "DB_NAME": "@DB_NAME"
+    "MONGODB_URI": "mongodb+srv://oxmang:oxmang24@dinaspangansumbar.id74iwk.mongodb.net/?appName=dinaspangansumbar",
+    "DB_NAME": "dinaspangansumbar"
   }
 }
