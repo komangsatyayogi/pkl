@@ -23,14 +23,8 @@ export async function connectDB() {
     console.log('🔄 Menghubungkan ke MongoDB...');
     const client = new MongoClient(MONGODB_URI, {
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 15000,
       socketTimeoutMS: 45000,
-      retryWrites: true,
-      w: 'majority',
-      // SSL/TLS settings untuk production
-      tls: true,
-      tlsAllowInvalidCertificates: false,
-      tlsAllowInvalidHostnames: false,
     });
 
     await client.connect();

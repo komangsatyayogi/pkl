@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "env": {
-    "MONGODB_URI": "mongodb+srv://oxmang:oxmang24@dinaspangansumbar.id74iwk.mongodb.net/?appName=dinaspangansumbar&retryWrites=true&w=majority&tls=true",
+    "MONGODB_URI": "mongodb+srv://oxmang:oxmang24@dinaspangansumbar.id74iwk.mongodb.net/?appName=dinaspangansumbar",
     "DB_NAME": "dinaspangansumbar"
   }
 }
