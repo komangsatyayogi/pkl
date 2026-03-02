@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const DB_NAME = process.env.DB_NAME || 'dinas_pangan_sumbar';
+const DB_NAME = process.env.DB_NAME || 'dinaspangansumbar';
 
 if (!MONGODB_URI) {
   console.error('❌ MONGODB_URI tidak di-set dalam environment variables');
@@ -25,6 +25,12 @@ export async function connectDB() {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
+      retryWrites: true,
+      w: 'majority',
+      // SSL/TLS settings untuk production
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false,
     });
 
     await client.connect();
