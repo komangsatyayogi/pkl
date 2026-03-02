@@ -35,7 +35,8 @@ function Berita() {
         setTotalCount(json.pagination.total);
         if (json.categories) setCategories(json.categories);
       } catch (err) {
-        setError(err.message);
+        console.error('API Error:', err);
+        setError(`Error: ${err.message || 'Gagal mengambil data berita'}`);
       } finally {
         setLoading(false);
       }
