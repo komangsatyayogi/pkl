@@ -44,7 +44,18 @@ export default async function handler(req, res) {
       categories: ['all', ...categories.sort()],
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Gagal mengambil data kegiatan' });
+    console.error('❌ API Kegiatan Error:', {
+      message: err.message,
+      stack: err.stack
+    });
+    
+    const errorMsg = err.message?.includes('MONGODB_URI') 
+      ? 'MongoDB belum dikonfigurasi. Hubungi admin.' 
+      : err.message || 'Gagal mengambil data kegiatan';
+    
+    res.status(500).json({ 
+      error: errorMsg,
+      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
   }
 }
